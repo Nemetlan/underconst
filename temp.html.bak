@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Hapugala National College — Coming Soon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:  #0D3B6E;
+      --gold:  #C9960A;
+      --text:  #1a1a2a;
+      --muted: #8a8a9a;
+      --line:  #e4e4ec;
+      --bg:    #ffffff;
+
+      /* fluid spacing scale */
+      --space-xs:  clamp(0.4rem,  1vmin, 0.6rem);
+      --space-sm:  clamp(0.7rem,  2vmin, 1rem);
+      --space-md:  clamp(1rem,    3vmin, 1.75rem);
+      --space-lg:  clamp(1.5rem,  4vmin, 2.5rem);
+      --space-xl:  clamp(2rem,    5vmin, 3.5rem);
+
+      /* fluid type scale */
+      --fs-eyebrow: clamp(0.58rem, 1.2vmin, 0.72rem);
+      --fs-title:   clamp(1.6rem,  5vmin,   3.4rem);
+      --fs-loc:     clamp(0.7rem,  1.4vmin, 0.85rem);
+      --fs-msg:     clamp(0.95rem, 2.2vmin, 1.25rem);
+      --fs-cdnum:   clamp(1.6rem,  5vmin,   3rem);
+      --fs-cdlbl:   clamp(0.52rem, 1vmin,   0.62rem);
+      --fs-input:   clamp(0.82rem, 1.6vmin, 0.92rem);
+      --fs-foot:    clamp(0.65rem, 1.2vmin, 0.75rem);
+    }
+
+    html {
+      height: 100%;
+      /* respect iOS safe areas */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* ─────────────────────────────────────────
+       PORTRAIT / TALL (phones, tablets upright)
+       default layout: single column, left-aligned
+    ───────────────────────────────────────── */
+    #app {
+      min-height: 100svh;               /* svh = small viewport height — avoids mobile bar jank */
+      display: flex;
+      flex-direction: column;
+      padding:
+        clamp(1.2rem, 4svh, 3.5rem)     /* top */
+        clamp(1.2rem, 6vw,  3.5rem)     /* right */
+        clamp(1rem,   3svh, 2.5rem)     /* bottom */
+        clamp(1.2rem, 6vw,  3.5rem);    /* left */
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* ── EYEBROW ── */
+    .eyebrow {
+      font-size: var(--fs-eyebrow);
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: var(--space-md);
+      opacity: 0;
+      animation: up 0.5s ease 0.1s forwards;
+    }
+
+    /* ── TITLE ── */
+    .school-name {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: var(--fs-title);
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-xs);
+      opacity: 0;
+      animation: up 0.5s ease 0.18s forwards;
+    }
+
+    .school-location {
+      font-size: var(--fs-loc);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-lg);
+      opacity: 0;
+      animation: up 0.5s ease 0.26s forwards;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 36px;
+      height: 2px;
+      background: var(--gold);
+      margin-bottom: var(--space-md);
+      opacity: 0;
+      animation: up 0.5s ease 0.3s forwards;
+    }
+
+    /* ── MESSAGE ── */
+    .message {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: var(--fs-msg);
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: var(--space-xl);
+      opacity: 0;
+      animation: up 0.5s ease 0.38s forwards;
+    }
+
+    /* ── COUNTDOWN ── */
+    .countdown {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(1rem, 4vw, 2.8rem);
+      margin-bottom: var(--space-xl);
+      opacity: 0;
+      animation: up 0.5s ease 0.46s forwards;
+      flex-wrap: wrap;               /* safety net on very narrow screens */
+    }
+
+    .cd-block {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(2px, 0.5vmin, 5px);
+      flex-shrink: 0;
+    }
+
+    .cd-num {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: var(--fs-cdnum);
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+      min-width: 2ch;               /* prevent width jumping */
+      display: inline-block;
+    }
+    .cd-num.tick { animation: blink 0.28s ease; }
+
+    .cd-label {
+      font-size: var(--fs-cdlbl);
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .cd-sep {
+      font-family: 'Playfair Display', serif;
+      font-size: var(--fs-cdnum);
+      font-weight: 300;
+      color: var(--line);
+      line-height: 1;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    /* ── NOTIFY ── */
+    .notify-section {
+      opacity: 0;
+      animation: up 0.5s ease 0.54s forwards;
+    }
+
+    .notify-label {
+      font-size: clamp(0.72rem, 1.4vmin, 0.8rem);
+      color: var(--muted);
+      margin-bottom: var(--space-xs);
+    }
+
+    .notify-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .notify-input {
+      flex: 1;
+      min-width: 0;                  /* flex shrink fix */
+      padding: clamp(8px, 1.5vmin, 11px) clamp(10px, 2vw, 14px);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-family: 'Inter', sans-serif;
+      font-size: var(--fs-input);
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .notify-input::placeholder { color: #c0c0cc; }
+    .notify-input:focus { border-color: var(--navy); }
+
+    .notify-btn {
+      padding: clamp(8px, 1.5vmin, 11px) clamp(14px, 3vw, 22px);
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(0.75rem, 1.4vmin, 0.84rem);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .notify-btn:hover  { background: #0a2f5a; }
+    .notify-btn:active { background: #061d3a; }
+    .notify-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .notify-success {
+      font-size: clamp(0.78rem, 1.4vmin, 0.84rem);
+      color: var(--gold);
+      padding: clamp(6px, 1vmin, 10px) 0;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      flex-shrink: 0;
+      border-top: 1px solid var(--line);
+      padding-top: clamp(0.8rem, 2svh, 1.5rem);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.8s forwards;
+    }
+
+    .footer-left {
+      font-size: var(--fs-foot);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .footer-left a { color: var(--muted); text-decoration: none; }
+    .footer-left a:hover { color: var(--navy); }
+
+    .footer-right { display: flex; gap: 6px; align-items: center; }
+
+    .house-dot {
+      width: clamp(6px, 1vmin, 8px);
+      height: clamp(6px, 1vmin, 8px);
+      border-radius: 50%;
+      opacity: 0.35;
+      transition: opacity 0.2s;
+      cursor: default;
+    }
+    .house-dot:hover { opacity: 1; }
+    .h-b { background: #3B82F6; }
+    .h-r { background: #EF4444; }
+    .h-g { background: #22C55E; }
+    .h-y { background: #EAB308; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes up {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
+
+    /* ─────────────────────────────────────────
+       LANDSCAPE PHONE  (≤ 640px wide, short)
+       compact everything, hide line breaks
+    ───────────────────────────────────────── */
+    @media (max-height: 480px) and (orientation: landscape) {
+      #app {
+        padding-top: clamp(0.7rem, 2svh, 1.2rem);
+        padding-bottom: clamp(0.5rem, 1.5svh, 1rem);
+        max-width: 900px;
+      }
+      .school-name { font-size: clamp(1.3rem, 4.5vw, 2.2rem); }
+      .school-location { margin-bottom: var(--space-sm); }
+      .message  { margin-bottom: var(--space-md); font-size: clamp(0.85rem, 1.8vw, 1.05rem); }
+      .countdown { margin-bottom: var(--space-md); }
+      .divider  { margin-bottom: var(--space-sm); }
+      /* side-by-side layout in landscape */
+      .main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+        column-gap: clamp(1.5rem, 4vw, 3rem);
+        align-content: center;
+      }
+      .eyebrow       { grid-column: 1; grid-row: 1; }
+      .school-name   { grid-column: 1; grid-row: 2; }
+      .school-location { grid-column: 1; grid-row: 3; }
+      .divider       { grid-column: 2; grid-row: 1; align-self: end; }
+      .message       { grid-column: 2; grid-row: 2; }
+      .countdown     { grid-column: 2; grid-row: 3; margin-bottom: 0; }
+      .notify-section { grid-column: 1 / -1; grid-row: 4; margin-top: var(--space-sm); }
+    }
+
+    /* ─────────────────────────────────────────
+       WIDE TABLET / SMALL LAPTOP  (768–1199px)
+    ───────────────────────────────────────── */
+    @media (min-width: 768px) {
+      #app { max-width: 760px; }
+    }
+
+    /* ─────────────────────────────────────────
+       LARGE DESKTOP  (≥ 1200px)
+    ───────────────────────────────────────── */
+    @media (min-width: 1200px) {
+      #app { max-width: 820px; }
+    }
+
+    /* ─────────────────────────────────────────
+       ULTRA-WIDE  (≥ 1800px)
+    ───────────────────────────────────────── */
+    @media (min-width: 1800px) {
+      #app { max-width: 960px; }
+    }
+
+    /* ─────────────────────────────────────────
+       SMALL PHONE  (< 360px)
+    ───────────────────────────────────────── */
+    @media (max-width: 359px) {
+      .cd-sep { display: none; }
+      .countdown { gap: clamp(0.7rem, 3vw, 1.2rem); }
+      .notify-row { flex-direction: column; }
+      .notify-btn { width: 100%; text-align: center; }
+      .footer-left { font-size: 0.62rem; }
+    }
+
+    /* ─────────────────────────────────────────
+       PRINT / HIGH DPI
+    ───────────────────────────────────────── */
+    @media print {
+      #app { padding: 2rem; }
+      .notify-section, .footer-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="main">
+
+    <p class="eyebrow">Est. 1902 · Coming Soon</p>
+
+    <h1 class="school-name">Hapugala<br>College Galle</h1>
+    <p class="school-location">Galle · Southern Province, Sri Lanka</p>
+
+    <div class="divider"></div>
+
+    <p class="message">
+      Our new website is under construction.<br>
+      Something thoughtful is on its way — <em>Let's Go Forward.</em>
+    </p>
+
+    <!-- Countdown -->
+    <div class="countdown">
+      <div class="cd-block">
+        <span class="cd-num" :class="{ tick: flipping.days }">{{ pad(time.days) }}</span>
+        <span class="cd-label">Days</span>
+      </div>
+      <span class="cd-sep" aria-hidden="true">·</span>
+      <div class="cd-block">
+        <span class="cd-num" :class="{ tick: flipping.hours }">{{ pad(time.hours) }}</span>
+        <span class="cd-label">Hours</span>
+      </div>
+      <span class="cd-sep" aria-hidden="true">·</span>
+      <div class="cd-block">
+        <span class="cd-num" :class="{ tick: flipping.minutes }">{{ pad(time.minutes) }}</span>
+        <span class="cd-label">Mins</span>
+      </div>
+      <span class="cd-sep" aria-hidden="true">·</span>
+      <div class="cd-block">
+        <span class="cd-num" :class="{ tick: flipping.seconds }">{{ pad(time.seconds) }}</span>
+        <span class="cd-label">Secs</span>
+      </div>
+    </div>
+
+
+  </div><!-- /.main -->
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-left">
+      <a href="tel:+940912241546">(+94) 91 22 41 546</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:hapugalamahavidyalaya@gmail.com">hapugalamahavidyalaya@gmail.com</a>
+    </div>
+    <div class="footer-right" title="Mahasen · Gemunu · Perakum · Vijaya" aria-label="House colours">
+      <div class="house-dot h-b"></div>
+      <div class="house-dot h-r"></div>
+      <div class="house-dot h-g"></div>
+      <div class="house-dot h-y"></div>
+    </div>
+  </footer>
+</div><!-- /#app -->
+
+<script>
+const { createApp, ref, reactive, onMounted, onUnmounted } = Vue;
+
+createApp({
+  setup() {
+    const target   = new Date('2026-05-15T14:00:00');
+    const time     = reactive({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const flipping = reactive({ days: false, hours: false, minutes: false, seconds: false });
+    let ticker = null;
+    let prev   = -1;
+
+    function flip(key) {
+      flipping[key] = false;
+      void document.body.offsetHeight;   // force reflow so CSS animation retriggers
+      flipping[key] = true;
+      setTimeout(() => { flipping[key] = false; }, 280);
+    }
+
+    function tick() {
+      const diff = Math.max(0, target - Date.now());
+      const s    = Math.floor(diff / 1000);
+      if (s === prev) return;
+      prev = s;
+
+      const nd = Math.floor(diff / 86400000);
+      const nh = Math.floor((diff % 86400000) / 3600000);
+      const nm = Math.floor((diff % 3600000)  / 60000);
+      const ns = Math.floor((diff % 60000)    / 1000);
+
+      if (nd !== time.days)    { time.days    = nd; flip('days'); }
+      if (nh !== time.hours)   { time.hours   = nh; flip('hours'); }
+      if (nm !== time.minutes) { time.minutes = nm; flip('minutes'); }
+      if (ns !== time.seconds) { time.seconds = ns; flip('seconds'); }
+    }
+
+    const email     = ref('');
+    const loading   = ref(false);
+    const submitted = ref(false);
+
+    function subscribe() {
+      if (!email.value.includes('@')) return;
+      loading.value = true;
+      setTimeout(() => { loading.value = false; submitted.value = true; }, 1200);
+    }
+
+    const pad = n => String(n).padStart(2, '0');
+
+    onMounted(()  => { tick(); ticker = setInterval(tick, 250); });
+    onUnmounted(() => clearInterval(ticker));
+
+    return { time, flipping, pad, email, loading, submitted, subscribe };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
